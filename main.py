@@ -16,14 +16,10 @@ DEFAULT_RECORDINGS_FOLDER = os.path.expanduser("~/Library/Group Containers/group
 OUTPUT_DIRECTORY = "out"
 
 def main():
-    # args = sys.argv
-    # if len(args) < 2:
-    #     print("You must pass the filename as an argument to the function.")
-    #     return 1
-
-    # filename = args[1]
-
     db_filename = DEFAULT_DB_FILENAME
+
+    if len(sys.argv) > 1:
+        db_filename = sys.argv[1]
 
     conn = sqlite3.connect(db_filename)
 
