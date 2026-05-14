@@ -60,6 +60,9 @@ def main():
             util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, "folders", folder))
 
         output_basename = util.escape(name)
+        if output_basename in name_counter:
+            output_basename += f" ({name_counter[output_basename]})"
+
         output_filename = os.path.join(OUTPUT_DIRECTORY, output_basename) + ".m4a"
 
         timestamp = util.convert_timestamp(date)
@@ -76,6 +79,8 @@ def main():
 
         if folder:
             os.symlink(output_filename, os.path.join(OUTPUT_DIRECTORY, "folders", folder, output_basename))
+
+        name_counter[output_basename] += 1
 
     table_txt = "\n".join(table)
     with open(os.path.join(OUTPUT_DIRECTORY, "data.tsv"), "w") as fp:
