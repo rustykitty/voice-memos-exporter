@@ -12,13 +12,6 @@ def escape(s: str):
     # You shouldn't be putting tabs in your Voice Memo names, but if you do, it
     # messes with the TSV that this program outputs.
     return s.replace("/", "-").replace("\t", " ")
-
-
-def get_filename(timestamp, title=""):
-    if title:
-        return timestamp
-    else:
-        return timestamp + " - " + escape(title)
     
 def mkdir_exist_ok(*args, **kwargs):
     with suppress(FileExistsError):
