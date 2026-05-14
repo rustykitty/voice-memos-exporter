@@ -23,8 +23,6 @@ def main():
 
     # filename = args[1]
 
-    print(DEFAULT_DB_FILENAME)
-
     db_filename = DEFAULT_DB_FILENAME
 
     conn = sqlite3.connect(db_filename)
@@ -40,9 +38,6 @@ def main():
     result = [
         Row(*row) for row in result
     ]
-
-    for row in result:
-        print(row)
 
     util.mkdir_exist_ok(OUTPUT_DIRECTORY)
     util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, "folders"))
