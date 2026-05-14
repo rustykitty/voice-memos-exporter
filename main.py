@@ -23,6 +23,8 @@ def main():
 
     # filename = args[1]
 
+    print(DEFAULT_DB_FILENAME)
+
     db_filename = DEFAULT_DB_FILENAME
 
     conn = sqlite3.connect(db_filename)
@@ -43,6 +45,7 @@ def main():
         print(row)
 
     util.mkdir_exist_ok(OUTPUT_DIRECTORY)
+    util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, "folders"))
 
     # for name collisions
     name_counter = Counter()
@@ -54,12 +57,10 @@ def main():
 
         if folder:
             folder = util.escape(folder)
-            util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, folder))
-            output_filename = os.path.join(folder, util.escape(name))
-        else:
-            output_filename = util.escape(name)
+            util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, "folders", folder))
 
-        output_filename = os.path.join(OUTPUT_DIRECTORY, output_filename) + ".m4a"
+        output_basename = util.escape(name)
+        output_filename = os.path.join(OUTPUT_DIRECTORY, output_basename) + ".m4a"
 
         timestamp = util.convert_timestamp(date)
 
@@ -72,6 +73,9 @@ def main():
         shutil.copy(filename, output_filename)
         # (atime, mtime)
         os.utime(output_filename, times = (time.time(), timestamp))
+
+        if folder:
+            os.symlink(output_filename, os.path.join(OUTPUT_DIRECTORY, "folders", folder, output_basename))
 
     table_txt = "\n".join(table)
     with open(os.path.join(OUTPUT_DIRECTORY, "data.tsv"), "w") as fp:
