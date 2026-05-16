@@ -15,11 +15,7 @@ DEFAULT_DB_FILENAME = os.path.expanduser("~/Library/Group Containers/group.com.a
 DEFAULT_RECORDINGS_FOLDER = os.path.expanduser("~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings/")
 OUTPUT_DIRECTORY = "out"
 
-def main():
-    db_filename = DEFAULT_DB_FILENAME
-
-    if len(sys.argv) > 1:
-        db_filename = sys.argv[1]
+def work(db_filename: str):
 
     conn = sqlite3.connect(db_filename)
 
@@ -76,6 +72,14 @@ def main():
     table_txt = "\n".join(table)
     with open(os.path.join(OUTPUT_DIRECTORY, "data.tsv"), "w") as fp:
         fp.write(table_txt)
+
+def main():
+    filename = DEFAULT_DB_FILENAME
+
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+
+    work(filename)
 
 if __name__ == "__main__":
     sys.exit(main())
