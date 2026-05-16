@@ -4,18 +4,25 @@ import os
 import os.path
 
 from collections import namedtuple, Counter
-import datetime
 import time
 import shutil
 
 import util
 
 # macOS storage locations as of macOS 15 Sequoia
-DEFAULT_DB_FILENAME = os.path.expanduser("~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings/CloudRecordings.db")
-DEFAULT_RECORDINGS_FOLDER = os.path.expanduser("~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings/")
+DEFAULT_DATA_DIR = os.path.expanduser("~/Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings/")
 OUTPUT_DIRECTORY = "out"
 
-def work(db_filename: str):
+QUERY = """
+SELECT ZCLOUDRECORDING.ZENCRYPTEDTITLE, ZDATE, ZPATH, ZFOLDER.ZENCRYPTEDNAME
+FROM ZCLOUDRECORDING 
+LEFT JOIN ZFOLDER ON ZCLOUDRECORDING.ZFOLDER = ZFOLDER.Z_PK 
+ORDER BY ZDATE ASC;
+"""
+
+def work(data_dir: str, db_filename: str = None):
+
+    db_filename = db_filename or os.path.join(data_dir, "CloudRecordings.db")
 
     conn = sqlite3.connect(db_filename)
 
@@ -23,8 +30,7 @@ def work(db_filename: str):
 
     Row = namedtuple("Row", "name date filename folder")
 
-    cursor.execute("SELECT ZCLOUDRECORDING.ZENCRYPTEDTITLE, ZDATE, ZPATH, ZFOLDER.ZENCRYPTEDNAME " \
-                   "FROM ZCLOUDRECORDING LEFT JOIN ZFOLDER ON ZCLOUDRECORDING.ZFOLDER = ZFOLDER.Z_PK ORDER BY ZDATE ASC;")
+    cursor.execute(QUERY)
     result = cursor.fetchall()
     
     result = [
@@ -58,7 +64,7 @@ def work(db_filename: str):
         table.append("\t".join(util.non_nullify((name, folder, util.iso8601(timestamp)))))
 
         # actually write the file now
-        filename = os.path.join(DEFAULT_RECORDINGS_FOLDER, filename)
+        filename = os.path.join(DEFAULT_DATA_DIR, filename)
 
         shutil.copy(filename, output_filename)
         # (atime, mtime)
@@ -74,12 +80,15 @@ def work(db_filename: str):
         fp.write(table_txt)
 
 def main():
-    filename = DEFAULT_DB_FILENAME
+    dirname = DEFAULT_DATA_DIR
+    filename = None
 
     if len(sys.argv) > 1:
-        filename = sys.argv[1]
+        dirname = sys.argv[1]
+    if len(sys.argv) > 2:
+        filename = sys.argv[2]
 
-    work(filename)
+    work(dirname, filename)
 
 if __name__ == "__main__":
     sys.exit(main())
