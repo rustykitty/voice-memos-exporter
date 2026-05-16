@@ -24,6 +24,18 @@ def work(data_dir: str, db_filename: str = None):
 
     db_filename = db_filename or os.path.join(data_dir, "CloudRecordings.db")
 
+    # make sure we can open the file because python sqlite3 errors are quite
+    # vague
+
+    try:
+        fp = open(db_filename)
+    except OSError as e:
+        print("Could not open SQLite database:", e)
+        return 1
+    else:
+        fp.close()
+
+
     conn = sqlite3.connect(db_filename)
 
     cursor = conn.cursor()
@@ -37,7 +49,9 @@ def work(data_dir: str, db_filename: str = None):
         Row(*row) for row in result
     ]
 
-    util.mkdir_exist_ok(OUTPUT_DIRECTORY)
+    shutil.rmtree(OUTPUT_DIRECTORY)
+
+    os.mkdir(OUTPUT_DIRECTORY)
     util.mkdir_exist_ok(os.path.join(OUTPUT_DIRECTORY, "folders"))
 
     # for name collisions
